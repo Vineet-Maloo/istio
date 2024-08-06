@@ -1,0 +1,45 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: tls-gateway
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*" 
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginx
+spec:
+  hosts:
+  - "*"
+#  - "sandbox.int.bank.aks.manulife.ca"        #"dev.cac.int.bank.aks.manulife.ca" 
+  gateways:
+  - "istio-system/tls-gateway"
+  http:
+  - match:
+    - uri:
+        exact: /be
+    route:
+    - destination:
+        port:
+          number: 8080
+        host: go-backend-service.mai.svc.cluster.local   
+  - match:
+    - uri:
+        exact: /frontend
+    route:
+    - destination:
+        port:
+          number: 8080
+        host: frontend-service.mai.svc.cluster.local           
+
+        
